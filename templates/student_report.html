@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-wrap">
+  <div class="page-banner"><div class="page-banner-icon">▤</div><div class="page-banner-copy"><h1>My Attendance Report</h1><p>Subject-wise attendance summary for your registered academic year.</p></div><div class="banner-date"><strong>{{ student.year }}</strong><span>PRN {{ student.prn or '—' }}</span></div></div>
+  <section class="panel report-profile-panel">
+    <div class="report-profile-grid">
+      <div><span>Student Name</span><strong>{{student.name}}</strong></div>
+      <div><span>PRN</span><strong>{{student.prn or '—'}}</strong></div>
+      <div><span>Year</span><strong>{{student.year}}</strong></div>
+      <div><span>Course</span><strong>{{student.course}}</strong></div>
+    </div>
+  </section>
+  <div class="stat-grid report-stat-grid">
+    <div class="stat-card blue"><div class="stat-icon">▣</div><div><span>Total Attendance</span><strong>{{rows|sum(attribute='total')}}</strong><small>All subjects</small></div></div>
+    <div class="stat-card green"><div class="stat-icon">✓</div><div><span>Present</span><strong>{{rows|sum(attribute='present')}}</strong><small>Attendance marks</small></div></div>
+    <div class="stat-card orange"><div class="stat-icon">×</div><div><span>Absent</span><strong>{{rows|sum(attribute='absent')}}</strong><small>Attendance marks</small></div></div>
+    <div class="stat-card purple"><div class="stat-icon">%</div><div><span>Overall Attendance</span><strong>{% set total=rows|sum(attribute='total') %}{% set present=rows|sum(attribute='present') %}{{ ((present / total * 100)|round(1)) if total else 0 }}%</strong><small>Current year</small></div></div>
+  </div>
+  <section class="panel">
+    <div class="panel-head"><div><h2>Subject-wise Report</h2><p class="muted">Your attendance is arranged subject-wise.</p></div><a class="primary button" href="{{url_for('student_report_export_pdf')}}">▣ Export PDF</a></div>
+    <div class="table-wrap"><table class="modern-table"><thead><tr><th>Subject</th><th>Total</th><th>Present</th><th>Absent</th><th>Attendance</th></tr></thead><tbody>{% for r in rows %}<tr><td><strong>{{r.code}}</strong> — {{r.name}}</td><td>{{r.total}}</td><td class="good-number">{{r.present}}</td><td class="bad-number">{{r.absent}}</td><td><span class="attendance-pill">{{r.pct}}%</span></td></tr>{% else %}<tr><td colspan="5" class="muted">No attendance records found.</td></tr>{% endfor %}</tbody></table></div>
+  </section>
+</div>
+{% endblock %}

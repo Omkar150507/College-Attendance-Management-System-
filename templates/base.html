@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#075aa2">
+    <title>{% block title %}{{ college_name }} - {{ college_tagline }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+{% if session.get('user_id') %}
+<div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+        <div class="side-brand">
+            <img src="{{ url_for('static', filename=logo_file) }}" alt="College logo">
+            <div>
+                <strong>{{ college_name }}</strong>
+                <span>{{ college_tagline }}</span>
+            </div>
+        </div>
+        <nav class="side-nav">
+            <div class="nav-section">Main Menu</div>
+            <a class="nav-item {% if request.path == '/dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}"><i>⌂</i>Dashboard</a>
+
+            {% if session.get('role') in ['admin','teacher','hod'] %}
+            <div class="nav-section">Attendance Management</div>
+            <a class="nav-item {% if request.path == '/attendance' %}active{% endif %}" href="{{ url_for('take_attendance') }}"><i>✓</i>Take Attendance</a>
+            <a class="nav-item {% if request.path == '/attendance-history' %}active{% endif %}" href="{{ url_for('attendance_history') }}"><i>◉</i>Attendance History</a>
+            <a class="nav-item {% if request.path == '/qr-attendance' %}active{% endif %}" href="{{ url_for('qr_attendance') }}"><i>▦</i>QR Attendance</a>
+            <a class="nav-item {% if request.path.startswith('/reports') %}active{% endif %}" href="{{ url_for('reports') }}"><i>▤</i>Reports</a>
+            <a class="nav-item {% if request.path.startswith('/timetable') %}active{% endif %}" href="{{ url_for('timetable') }}"><i>▣</i>Timetable</a>
+            {% endif %}
+
+            {% if session.get('role') == 'student' %}
+            <div class="nav-section">Student</div>
+            <a class="nav-item {% if request.path == '/student/dashboard' %}active{% endif %}" href="{{ url_for('student_dashboard') }}"><i>⌂</i>My Dashboard</a>
+            <a class="nav-item {% if request.path == '/student/calendar' %}active{% endif %}" href="{{ url_for('student_calendar') }}"><i>▦</i>Calendar</a>
+            <a class="nav-item {% if request.path.startswith('/timetable') %}active{% endif %}" href="{{ url_for('timetable') }}"><i>▣</i>My Timetable</a>
+            <a class="nav-item {% if request.path.startswith('/student/report') %}active{% endif %}" href="{{ url_for('student_report') }}"><i>▤</i>My Report</a>
+            {% endif %}
+
+            {% if session.get('role') in ['admin','hod'] %}
+            <div class="nav-section">College Management</div>
+            <a class="nav-item {% if request.path.startswith('/students') %}active{% endif %}" href="{{ url_for('students') }}"><i>♙</i>Student Management</a>
+            <a class="nav-item {% if request.path.startswith('/promotion') %}active{% endif %}" href="{{ url_for('student_promotion') }}"><i>↑</i>Promotion</a>
+            <a class="nav-item {% if request.path.startswith('/teachers') %}active{% endif %}" href="{{ url_for('teachers') }}"><i>♟</i>Teacher Management</a>
+            <a class="nav-item {% if request.path.startswith('/subjects') %}active{% endif %}" href="{{ url_for('subjects') }}"><i>▥</i>Subject Management</a>
+            {% if session.get('role') == 'admin' %}
+            <a class="nav-item {% if request.path.startswith('/departments') %}active{% endif %}" href="{{ url_for('departments') }}"><i>▦</i>Departments</a>
+            <a class="nav-item {% if request.path.startswith('/admin/backup') %}active{% endif %}" href="{{ url_for('backup_database') }}"><i>↓</i>Backup &amp; Restore</a>
+            <a class="nav-item {% if request.path.startswith('/admin/settings') %}active{% endif %}" href="{{ url_for('settings') }}"><i>⚙</i>Admin Settings</a>
+            {% endif %}
+            {% if session.get('role') == 'hod' %}
+            <a class="nav-item {% if request.path.startswith('/hod/dashboard') %}active{% endif %}" href="{{ url_for('hod_dashboard') }}"><i>▤</i>HOD Dashboard</a>
+            {% endif %}
+            <a class="nav-item {% if request.path.startswith('/activity-log') %}active{% endif %}" href="{{ url_for('activity_log') }}"><i>☷</i>Activity Log</a>
+            {% endif %}
+
+            <div class="nav-section">Account</div>
+            <a class="nav-item {% if request.path.startswith('/notifications') %}active{% endif %}" href="{{ url_for('notifications') }}"><i>◆</i>Notifications{% if unread_notifications %}<b class="nav-count">{{ unread_notifications }}</b>{% endif %}</a>
+            <a class="nav-item {% if request.path.startswith('/profile') %}active{% endif %}" href="{{ url_for('profile') }}"><i>●</i>Profile</a>
+            <a class="nav-item logout-item" href="{{ url_for('logout') }}"><i>↪</i>Logout</a>
+        </nav>
+        <div class="side-bottom">
+            <div class="side-mortar">⌂</div>
+            <strong>{{ college_name }}</strong>
+            <span>Better Education • Brighter Future</span>
+        </div>
+    </aside>
+
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+    <main class="main-content">
+        <header class="topbar">
+            <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open menu">☰</button>
+            <div class="topbar-brand">
+                <img src="{{ url_for('static', filename=logo_file) }}" alt="Logo">
+                <div><strong>{{ college_name }}</strong><small>{{ college_tagline }}</small></div>
+            </div>
+            <div class="topbar-search"><span>⌕</span><input type="text" placeholder="Search by PRN, Name, Role..." aria-label="Search"></div>
+            <div class="topbar-actions">
+                <a class="notification-btn" href="{{ url_for('notifications') }}" aria-label="Notifications">◆{% if unread_notifications %}<b>{{ unread_notifications }}</b>{% endif %}</a>
+                <div class="profile-chip">
+                    <div class="avatar">{{ (session.get('full_name') or session.get('username') or 'U')[:1]|upper }}</div>
+                    <div><strong>{{ session.get('full_name') or session.get('username') or 'User' }}</strong><small>{{ session.get('role','')|title }}</small></div>
+                    <span class="chev">⌄</span>
+                </div>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div>
+            {% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+
+        <footer class="site-footer">
+            <span>© 2026 {{ college_name }}. All Rights Reserved.</span>
+            <span>Education | Research | Better Healthcare</span>
+        </footer>
+    </main>
+</div>
+<nav class="mobile-bottom-nav">
+    <a href="{{ url_for('dashboard') }}"><span>⌂</span>Home</a>
+    {% if session.get('role') in ['admin','teacher','hod'] %}<a href="{{ url_for('take_attendance') }}"><span>✓</span>Attendance</a>{% else %}<a href="{{ url_for('student_calendar') }}"><span>▦</span>Calendar</a>{% endif %}
+    <a href="{{ url_for('notifications') }}"><span>◆</span>Alerts</a>
+    <a href="{{ url_for('profile') }}"><span>●</span>Profile</a>
+</nav>
+{% else %}
+    {% block login_content %}{% endblock %}
+{% endif %}
+{% block scripts %}{% endblock %}
+<script>
+(function(){
+  const btn=document.getElementById('menuToggle');
+  const side=document.getElementById('sidebar');
+  const overlay=document.getElementById('mobileOverlay');
+  function closeMenu(){ if(side) side.classList.remove('open'); if(overlay) overlay.classList.remove('show'); }
+  if(btn && side && overlay){
+    btn.addEventListener('click',function(){side.classList.toggle('open');overlay.classList.toggle('show');});
+    overlay.addEventListener('click',closeMenu);
+    document.querySelectorAll('.sidebar a').forEach(function(a){a.addEventListener('click',closeMenu);});
+  }
+})();
+</script>
+</body>
+</html>
