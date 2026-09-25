@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-wrap calendar-page">
+  <div class="page-banner">
+    <div class="page-banner-icon">▣</div>
+    <div class="page-banner-copy"><h1>Monthly Attendance</h1><p>{{ student.name }} · PRN {{ student.prn or '—' }}</p></div>
+    <div class="banner-date"><strong>{{ student.year }}</strong><span>Attendance Calendar</span></div>
+  </div>
+
+  <div class="calendar-toolbar panel">
+    <a class="button" id="prevMonth">‹ Previous</a>
+    <div class="month-title"><strong id="monthTitle">{{ month }}</strong><span>Select a date to view subject-wise attendance</span></div>
+    <a class="button" id="nextMonth">Next ›</a>
+    <form method="get" class="month-picker"><input type="month" name="month" value="{{ month }}"><button class="primary">View</button></form>
+  </div>
+
+  <div class="calendar-layout">
+    <section class="panel calendar-card">
+      <div class="calendar-head"><h2 id="calendarHeading">Attendance Calendar</h2><div class="legend"><span><i class="dot present"></i>Present</span><span><i class="dot absent"></i>Absent</span><span><i class="dot none"></i>No Record</span></div></div>
+      <div class="weekdays"><b>Sun</b><b>Mon</b><b>Tue</b><b>Wed</b><b>Thu</b><b>Fri</b><b>Sat</b></div>
+      <div id="calendarGrid" class="calendar-grid"></div>
+    </section>
+
+    <aside class="panel date-details">
+      <div class="panel-head"><div><h2>Attendance Details</h2><p id="selectedLabel" class="muted">Select a date</p></div></div>
+      <div id="detailContent">
+        {% if details %}
+          {% for d in details %}
+          <div class="detail-row"><div><strong>{{ d.code }} — {{ d.subject_name }}</strong><span>Lecture {{ d.lecture_no }}{% if d.lecture_time %} · {{ d.lecture_time|timerange12 }}{% endif %}</span></div><b class="status-badge {% if d.status=='Present' %}present{% else %}absent{% endif %}">{{ d.status }}</b></div>
+          {% endfor %}
+        {% else %}<div class="empty-detail">Select a date with attendance to see the subject, lecture and status.</div>{% endif %}
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+const days = {{ days|tojson }};
+const currentMonth = '{{ month }}';
+const initialDate = '{{ selected_date or "" }}';
+const detailByDate = {};
+{% if details %}
+detailByDate['{{ selected_date }}'] = [
+{% for d in details %}{code:'{{ d.code|e }}',name:'{{ d.subject_name|e }}',lecture:'{{ d.lecture_no }}',time:'{{ d.lecture_time|timerange12 if d.lecture_time else "" }}',status:'{{ d.status }}'}{% if not loop.last %},{% endif %}{% endfor %}
+];
+{% endif %}
+const dayMap = Object.fromEntries(days.map(d => [d.attendance_date, d]));
+const [year, month] = currentMonth.split('-').map(Number);
+const first = new Date(year, month-1, 1);
+const last = new Date(year, month, 0);
+const grid = document.getElementById('calendarGrid');
+for(let i=0;i<first.getDay();i++) grid.insertAdjacentHTML('beforeend','<div class="cal-empty"></div>');
+for(let n=1;n<=last.getDate();n++){
+  const key = `${year}-${String(month).padStart(2,'0')}-${String(n).padStart(2,'0')}`;
+  const d = dayMap[key]; const cls = d ? (Number(d.present)>0 && Number(d.absent)===0 ? 'present' : Number(d.absent)>0 && Number(d.present)===0 ? 'absent' : 'mixed') : 'none';
+  const label = d ? `${d.present} present · ${d.absent} absent` : 'No attendance';
+  grid.insertAdjacentHTML('beforeend', `<button type="button" class="calendar-cell ${cls}" onclick="selectDate('${key}')"><strong>${n}</strong><span>${label}</span></button>`);
+}
+function selectDate(key){
+  const url = new URL(window.location.href); url.searchParams.set('month', currentMonth); url.searchParams.set('date', key); window.location.href=url.toString();
+}
+function moveMonth(delta){
+  const d = new Date(year, month-1+delta, 1); const m = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; window.location.href = `?month=${m}`;
+}
+document.getElementById('prevMonth').onclick=()=>moveMonth(-1);
+document.getElementById('nextMonth').onclick=()=>moveMonth(1);
+document.getElementById('calendarHeading').textContent = first.toLocaleString(undefined,{month:'long',year:'numeric'});
+document.getElementById('monthTitle').textContent = first.toLocaleString(undefined,{month:'long',year:'numeric'});
+document.getElementById('selectedLabel').textContent = initialDate ? new Date(initialDate+'T00:00:00').toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'}) : 'Select a date';
+</script>
+<style>
+.calendar-page{max-width:1250px;margin:0 auto;padding-bottom:30px}.calendar-toolbar{display:flex;align-items:center;gap:12px;margin-top:16px;padding:14px}.month-title{flex:1;text-align:center}.month-title strong{display:block;font-size:20px;color:#17324d}.month-title span{font-size:12px;color:#718096}.month-picker{display:flex;gap:7px}.month-picker input{min-height:40px;border:1px solid #cfd9e5;border-radius:9px;padding:0 8px}.calendar-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(290px,1fr);gap:16px;margin-top:16px}.calendar-card{padding:18px}.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}.calendar-head h2{margin:0}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:#64748b}.legend span{display:flex;align-items:center;gap:5px}.dot{width:9px;height:9px;border-radius:50%;display:inline-block}.dot.present{background:#2e9b67}.dot.absent{background:#d9534f}.dot.none{background:#cbd5e1}.weekdays,.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}.weekdays b{text-align:center;color:#708198;font-size:12px;padding:7px}.calendar-cell{min-height:78px;border:1px solid #e4ebf2;border-radius:11px;background:#fff;text-align:left;padding:9px;cursor:pointer;display:flex;flex-direction:column;gap:6px}.calendar-cell strong{font-size:16px}.calendar-cell span{font-size:10px;line-height:1.25;color:#607286}.calendar-cell.present{background:#edf9f2;border-color:#bde7ce}.calendar-cell.present strong{color:#187345}.calendar-cell.absent{background:#fff0f0;border-color:#f0c4c4}.calendar-cell.absent strong{color:#b52d2d}.calendar-cell.mixed{background:#fff8e8;border-color:#eed69a}.calendar-cell.none{background:#f6f8fa}.calendar-cell.none strong{color:#667789}.cal-empty{min-height:78px}.date-details{height:fit-content}.detail-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid #e8eef4}.detail-row strong{display:block;color:#17324d;font-size:13px}.detail-row span{display:block;color:#758396;font-size:11px;margin-top:4px}.empty-detail{padding:18px;background:#f7f9fb;border-radius:10px;color:#718096;font-size:13px;line-height:1.5}
+@media(max-width:900px){.calendar-layout{grid-template-columns:1fr}.calendar-toolbar{flex-wrap:wrap}.month-title{order:-1;flex-basis:100%}.month-picker{width:100%}.month-picker input{flex:1}}
+@media(max-width:560px){.calendar-page{padding:0 4px 24px}.calendar-cell{min-height:62px;padding:7px}.calendar-cell span{font-size:9px}.weekdays,.calendar-grid{gap:4px}.calendar-head{align-items:flex-start;flex-direction:column}.legend{gap:8px}.calendar-toolbar .button{flex:1;text-align:center}}
+</style>
+{% endblock %}
