@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block content %}
+<div class="content-wrap"><div class="page-banner"><div class="page-banner-icon">👤</div><div class="page-banner-copy"><h1>{{title}}</h1><p>Add or update student details and assign the practical batch.</p></div></div>
+<div class="panel" style="max-width:760px;margin:auto"><form method="post" class="form-grid">
+<div><label>PRN</label><input name="prn" value="{{student.prn if student else ''}}" required></div>
+<div><label>Student Name</label><input name="name" value="{{student.name if student else ''}}" required></div>
+<div><label>Course</label><input name="course" value="{{student.course if student else 'B.Pharm'}}" readonly></div>
+<div><label>Year</label><select name="year" required>{% for y in year_options %}<option value="{{y}}" {% if student and student.year==y %}selected{% elif not student and y=='1st Year' %}selected{% endif %}>{{y}}</option>{% endfor %}</select></div>
+<div><label>Practical Batch</label><select name="batch"><option value="">Not Assigned</option>{% for b in batch_options %}<option value="{{b}}" {% if student and student.batch==b %}selected{% endif %}>{{b}}</option>{% endfor %}</select><small class="muted">Batch is used only when Practical is selected.</small></div>
+<div style="grid-column:1/-1;display:flex;gap:10px;justify-content:flex-end"><a class="button" href="{{url_for('students')}}">Cancel</a><button class="primary">Save Student</button></div>
+</form></div></div>{% endblock %}

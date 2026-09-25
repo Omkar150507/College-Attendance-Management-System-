@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Y.N.P. College of Pharmacy - Attendance Management System{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root{
+            --navy:#073b70;
+            --navy2:#0b477f;
+            --blue:#1683e8;
+            --blue2:#0b73d1;
+            --bg:#f4f8fc;
+            --card:#ffffff;
+            --text:#17324d;
+            --muted:#72869a;
+            --border:#e1ebf4;
+            --success:#159447;
+            --danger:#d83b45;
+            --sidebar:158px;
+        }
+        *{box-sizing:border-box}
+        body{
+            margin:0;
+            font-family:Inter,Arial,sans-serif;
+            color:var(--text);
+            background:var(--bg);
+            font-size:13px;
+        }
+        a{text-decoration:none;color:inherit}
+        .layout{min-height:100vh;display:flex}
+        .sidebar{
+            position:fixed;left:0;top:0;bottom:0;width:var(--sidebar);
+            background:linear-gradient(180deg,#0b4b82 0%,#063761 100%);
+            color:#fff;overflow-y:auto;z-index:20;
+        }
+        .brand{
+            min-height:78px;padding:11px 9px;display:flex;align-items:center;gap:7px;
+            border-bottom:1px solid rgba(255,255,255,.12)
+        }
+        .brand img{width:38px;height:38px;object-fit:contain;background:#fff;border-radius:50%;padding:2px}
+        .brand-title{font-size:9px;line-height:1.25;font-weight:700}
+        .brand-sub{font-size:7px;opacity:.75;margin-top:2px}
+        .section-title{
+            padding:12px 12px 5px;font-size:8px;letter-spacing:.7px;
+            text-transform:uppercase;color:rgba(255,255,255,.52);font-weight:700
+        }
+        .nav-link{
+            display:flex;align-items:center;gap:8px;padding:9px 11px;margin:2px 5px;
+            border-radius:6px;color:rgba(255,255,255,.87);font-size:10px;font-weight:500;
+            transition:.15s;
+        }
+        .nav-link:hover{background:rgba(255,255,255,.09)}
+        .nav-link.active{background:#1085e9;color:#fff}
+        .nav-icon{width:15px;text-align:center;font-size:11px}
+        .sidebar-footer{
+            margin:16px 9px 12px;padding-top:13px;border-top:1px solid rgba(255,255,255,.12);
+            text-align:center;font-size:7px;color:rgba(255,255,255,.62);line-height:1.45
+        }
+        .main{margin-left:var(--sidebar);width:calc(100% - var(--sidebar));min-width:0}
+        .topbar{
+            height:53px;background:#fff;border-bottom:1px solid var(--border);
+            display:flex;align-items:center;padding:0 18px;gap:12px;position:sticky;top:0;z-index:10
+        }
+        .top-brand{display:flex;align-items:center;gap:7px;min-width:215px}
+        .top-brand img{width:32px;height:32px;object-fit:contain;border-radius:50%}
+        .top-brand strong{font-size:12px}
+        .top-brand span{display:block;color:var(--muted);font-size:7px;margin-top:2px}
+        .search{
+            flex:1;max-width:300px;background:#f3f7fb;border:1px solid #e2edf6;
+            border-radius:18px;padding:8px 13px;color:#8092a3;font-size:9px
+        }
+        .user-box{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:9px}
+        .avatar{width:28px;height:28px;border-radius:50%;background:#eaf4fc;color:#17649a;
+            display:flex;align-items:center;justify-content:center;font-weight:700}
+        .page{padding:14px 17px 30px}
+        .flash-wrap{margin-bottom:10px}
+        .flash{padding:9px 12px;border-radius:7px;background:#eaf4ff;border:1px solid #cfe5fa;color:#155b91}
+        .flash.error{background:#fff0f0;border-color:#ffd0d0;color:#a52b34}
+        .flash.success{background:#effaf2;border-color:#ccefd6;color:#17723a}
+        .flash.warning{background:#fff8e8;border-color:#f4dfaa;color:#805d08}
+        .content-card{
+            background:var(--card);border:1px solid var(--border);border-radius:10px;
+            box-shadow:0 3px 12px rgba(25,73,110,.05)
+        }
+        button,.btn{
+            border:0;border-radius:6px;padding:8px 12px;background:var(--blue);
+            color:#fff;cursor:pointer;font:inherit
+        }
+        button:hover,.btn:hover{background:var(--blue2)}
+        input,select,textarea{
+            width:100%;border:1px solid #d9e5ef;border-radius:6px;background:#fff;
+            padding:8px 9px;font:inherit;color:var(--text);outline:none
+        }
+        input:focus,select:focus,textarea:focus{border-color:#7dbbe9;box-shadow:0 0 0 2px rgba(22,131,232,.08)}
+        table{width:100%;border-collapse:collapse}
+        th{background:#eef6fd;color:#587087;font-size:9px;text-align:left;padding:9px}
+        td{padding:9px;border-bottom:1px solid #edf2f6;font-size:9px}
+        .footer{padding:14px 5px;color:#93a1ad;font-size:8px;display:flex;justify-content:space-between}
+        @media(max-width:800px){
+            :root{--sidebar:0px}
+            .sidebar{display:none}
+            .main{margin-left:0;width:100%}
+            .top-brand{min-width:0}
+            .top-brand div{display:none}
+            .search{display:none}
+            .page{padding:10px}
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="brand">
+            <img src="{{ url_for('static', filename=logo_file or 'logo.png') }}" alt="College Logo">
+            <div>
+                <div class="brand-title">Y.N.P. College of Pharmacy</div>
+                <div class="brand-sub">Attendance Management System</div>
+            </div>
+        </div>
+
+        <div class="section-title">Main Menu</div>
+        <a class="nav-link" href="/dashboard"><span class="nav-icon">⌂</span>Dashboard</a>
+
+        <div class="section-title">Attendance Management</div>
+        <a class="nav-link" href="/attendance"><span class="nav-icon">✓</span>Take Attendance</a>
+        <a class="nav-link" href="/attendance-history"><span class="nav-icon">◉</span>Attendance History</a>
+        <a class="nav-link" href="/qr-attendance"><span class="nav-icon">▦</span>QR Attendance</a>
+        <a class="nav-link" href="/reports"><span class="nav-icon">▤</span>Reports</a>
+        <a class="nav-link" href="/timetable"><span class="nav-icon">▣</span>Timetable</a>
+
+        <div class="section-title">College Management</div>
+        <a class="nav-link" href="/students"><span class="nav-icon">♙</span>Student Management</a>
+        <a class="nav-link" href="/promotion"><span class="nav-icon">↑</span>Promotion</a>
+        <a class="nav-link" href="/teachers"><span class="nav-icon">♟</span>Teacher Management</a>
+        <a class="nav-link" href="/subjects"><span class="nav-icon">▦</span>Subject Management</a>
+        <a class="nav-link" href="/activity-log"><span class="nav-icon">☷</span>Activity Log</a>
+        <a class="nav-link" href="/admin/backup"><span class="nav-icon">↓</span>Backup &amp; Restore</a>
+        <a class="nav-link" href="/admin/settings"><span class="nav-icon">⚙</span>Admin Settings</a>
+
+        <div class="section-title">Account</div>
+        <a class="nav-link" href="/notifications"><span class="nav-icon">◆</span>Notifications</a>
+        <a class="nav-link" href="/profile"><span class="nav-icon">●</span>Profile</a>
+        <a class="nav-link" href="/logout"><span class="nav-icon">↪</span>Logout</a>
+
+        <div class="sidebar-footer">
+            Y.N.P. College of Pharmacy<br>
+            Better Education • Brighter Future
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div class="top-brand">
+                <img src="{{ url_for('static', filename=logo_file or 'logo.png') }}" alt="Logo">
+                <div>
+                    <strong>Y.N.P. College of Pharmacy</strong>
+                    <span>Attendance Management System</span>
+                </div>
+            </div>
+            <div class="search">⌕ &nbsp; Search by PRN, Name, Role...</div>
+            <div class="user-box">
+                <div class="avatar">{{ (current_user or 'C')[:1]|upper }}</div>
+                <div>
+                    <strong>{{ current_user or 'User' }}</strong><br>
+                    <span style="color:#8a9aaa;font-size:8px">{{ session.get('role','')|title }}</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="page">
+            <div class="flash-wrap">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            {% block content %}{% endblock %}
+        </section>
+
+        <div class="footer">
+            <span>© 2026 Y.N.P. College of Pharmacy. All Rights Reserved.</span>
+            <span>Education | Research | Better Healthcare</span>
+        </div>
+    </main>
+</div>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>
