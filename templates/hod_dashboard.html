@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-wrap">
+  <div class="page-banner"><div class="page-banner-icon">▤</div><div class="page-banner-copy"><h1>HOD Dashboard</h1><p>{{ department.name if department else 'Department' }} · Department overview and low-attendance students.</p></div></div>
+  <div class="stat-grid">
+    <div class="stat-card blue"><div class="stat-icon">♙</div><div><span>Students</span><strong>{{ students }}</strong><small>Department students</small></div></div>
+    <div class="stat-card green"><div class="stat-icon">♟</div><div><span>Teachers</span><strong>{{ teachers }}</strong><small>Department teachers</small></div></div>
+    <div class="stat-card orange"><div class="stat-icon">!</div><div><span>Threshold</span><strong>{{ threshold }}%</strong><small>Attendance threshold</small></div></div>
+  </div>
+  <section class="panel"><div class="panel-head"><div><h2>Low Attendance Students</h2><p class="muted">Students below {{ threshold }}% attendance.</p></div></div>
+    <div class="table-wrap"><table class="modern-table"><thead><tr><th>PRN</th><th>Name</th><th>Year</th><th>Total</th><th>Present</th><th>Attendance</th></tr></thead><tbody>
+    {% for s in low %}<tr><td>{{ s.prn or '—' }}</td><td><strong>{{ s.name }}</strong></td><td>{{ s.year }}</td><td>{{ s.total }}</td><td>{{ s.present }}</td><td><span class="status-badge absent">{{ s.pct }}%</span></td></tr>{% else %}<tr><td colspan="6" class="muted">No students below the attendance threshold.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>
+{% endblock %}

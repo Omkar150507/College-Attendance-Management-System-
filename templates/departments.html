@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-wrap">
+  <div class="page-banner"><div class="page-banner-icon">▦</div><div class="page-banner-copy"><h1>Departments</h1><p>Manage departments and assign HODs.</p></div></div>
+  <div class="dashboard-grid">
+    <section class="panel">
+      <div class="panel-head"><div><h2>Add Department</h2><p class="muted">Create a department for students, subjects and staff.</p></div></div>
+      <form method="post" class="form-grid">
+        <div><label>Department Code</label><input name="code" required placeholder="e.g. BPH"></div>
+        <div><label>Department Name</label><input name="name" required placeholder="e.g. B.Pharm"></div>
+        <div><button class="primary" type="submit">Add Department</button></div>
+      </form>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><div><h2>Assign HOD</h2><p class="muted">Assign an approved teacher as HOD.</p></div></div>
+      <form method="post" action="{{ url_for('assign_hod') }}" class="form-grid">
+        <div><label>Department</label><select name="department_id" required><option value="">Select department</option>{% for d in departments %}<option value="{{ d.id }}">{{ d.code }} — {{ d.name }}</option>{% endfor %}</select></div>
+        <div><label>Teacher</label><select name="teacher_id" required><option value="">Select teacher</option>{% for t in teachers %}<option value="{{ t.id }}">{{ t.full_name or t.username }}</option>{% endfor %}</select></div>
+        <div><button class="primary" type="submit">Assign HOD</button></div>
+      </form>
+    </section>
+  </div>
+  <section class="panel"><div class="panel-head"><div><h2>Department List</h2><p class="muted">Edit or remove departments when they have no linked records.</p></div></div>
+    <div class="table-wrap"><table class="modern-table"><thead><tr><th>Code</th><th>Name</th><th>Status</th><th>Action</th></tr></thead><tbody>
+    {% for d in departments %}<tr><td><strong>{{ d.code }}</strong></td><td>{{ d.name }}</td><td><span class="status-badge {% if d.active %}present{% else %}neutral{% endif %}">{{ 'Active' if d.active else 'Inactive' }}</span></td><td><form method="post" action="{{ url_for('edit_department', department_id=d.id) }}" style="display:flex;gap:6px;align-items:center"><input name="code" value="{{ d.code }}" style="max-width:100px"><input name="name" value="{{ d.name }}"><select name="active" style="max-width:110px"><option value="1" {% if d.active %}selected{% endif %}>Active</option><option value="0" {% if not d.active %}selected{% endif %}>Inactive</option></select><button class="button" type="submit">Save</button></form><form method="post" action="{{ url_for('delete_department', department_id=d.id) }}" style="margin-top:6px" onsubmit="return confirm('Delete this department?')"><button class="button danger" type="submit">Delete</button></form></td></tr>{% else %}<tr><td colspan="4" class="muted">No departments found.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>
+</div>
+{% endblock %}
